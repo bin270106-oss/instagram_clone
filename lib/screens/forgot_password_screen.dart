@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/widgets/text_field_input.dart';
 // Lưu ý: Đổi đường dẫn import này thành file trung chuyển auth_methods.dart nếu bạn dùng cách 2
 import 'package:instagram_clone/resources/forgot_password_methods.dart'; 
-import 'package:instagram_clone/screens/signup_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -53,9 +51,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: const Color(0xFF121212), // Nền đen tiệp màu với trang Login
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1C1C1E),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -65,153 +63,128 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0), // Căn lề chuẩn
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start, // Đưa toàn bộ nội dung sang trái
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 
-                // Icon ổ khóa giống giao diện Instagram
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.lock_outline,
-                    size: 60,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
+                // Tiêu đề chính
                 const Text(
-                  'Trouble Logging In?',
+                  'Tìm tài khoản',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 
+                // Dòng mô tả
                 const Text(
-                  'Enter your email and we\'ll send you a link to get back into your account.',
-                  textAlign: TextAlign.center,
+                  'Nhập email hoặc tên người dùng của bạn.',
                   style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
+                    fontSize: 15,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 4),
 
-                // Ô nhập Email
-                TextFieldInput(
-                  hintText: 'Email',
-                  textInputType: TextInputType.emailAddress,
-                  textEditingController: _emailController,
-                ),
-                const SizedBox(height: 24),
-
-                // Nút Gửi Link Đặt Lại Mật Khẩu
-                InkWell(
-                  onTap: resetPassword,
-                  child: Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                      ),
-                      color: Colors.blue,
-                    ),
-                    child: _isLoading
-                        ? const Center(
-                            child: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          )
-                        : const Text(
-                            'Send Login Link',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Dòng chữ chia cắt "OR"
-                const Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey)),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Nút Tạo tài khoản mới
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => const SignupScreen()),
-                    );
+                // Link hỗ trợ hack tài khoản
+                GestureDetector(
+                  onTap: () {
+                    // Xử lý chuyển hướng đến trang hỗ trợ tài khoản bị hack
                   },
                   child: const Text(
-                    'Create New Account',
+                    'Tôi cho rằng tài khoản của mình đã bị hack',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 15,
+                      color: Color(0xFF3797EF), // Màu xanh dương của link
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Ô nhập dữ liệu
+                TextField(
+                  controller: _emailController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Email hoặc tên người dùng',
+                    hintStyle: TextStyle(color: Colors.grey[500], fontSize: 15),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E1E), // Màu nền ô nhập liệu tối
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12), // Bo tròn góc
+                      borderSide: BorderSide(color: Colors.grey[800]!),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[800]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.blue),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Nút Tiếp tục (Màu xanh)
+                ElevatedButton(
+                  onPressed: resetPassword,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0064E0),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24), // Bo tròn dạng viên thuốc
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Tiếp tục',
+                          style: TextStyle(
+                            color: Colors.white, 
+                            fontSize: 16, 
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 12),
+
+                // Nút Tìm bằng số di động (Màu xám tối)
+                ElevatedButton(
+                  onPressed: () {
+                    // Xử lý logic tìm bằng số điện thoại
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2C2C2E), // Màu nền nút phụ
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Tìm bằng số di động',
+                    style: TextStyle(
+                      color: Colors.grey[300], 
+                      fontSize: 16, 
+                      fontWeight: FontWeight.bold
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-      
-      // Footer: Nút quay lại đăng nhập ở dưới cùng màn hình
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: Colors.grey[800]!, width: 1),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Back to Log in',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

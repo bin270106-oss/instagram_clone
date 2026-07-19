@@ -15,7 +15,7 @@ class StorageMethods {
       url,
       body: {
         'image': base64Image,
-      },
+      }, 
     );
 
     if (response.statusCode == 200) {

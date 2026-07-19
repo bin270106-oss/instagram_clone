@@ -1,75 +1,56 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
+import 'package:instagram_clone/models/user.dart' as model;
+import 'package:instagram_clone/resources/storage_methods.dart'; // Import StorageMethods vào đây
 
 class FirestoreMethods {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; //[cite: 15]
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // 1. HÀM UPLOAD ẢNH LÊN IMGBB LẤY LINK
-  Future<String> uploadImageToImgBB(Uint8List fileBytes) async {
-    try {
-      // ĐIỀN API KEY IMGBB CỦA ÔNG VÀO ĐÂY NHÉ 👇
-      const String apiKey = '0f883d771c6a41c072a5fad059646708'; 
-      final Uri url = Uri.parse('https://api.imgbb.com/1/upload?key=$apiKey');
-
-      // Chuyển ảnh thành chuỗi base64 để ném qua ImgBB
-      String base64Image = base64Encode(fileBytes);
-
-      final response = await http.post(
-        url,
-        body: {
-          'image': base64Image,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        return responseData['data']['url']; // Trả về cái link xịn sò
-      } else {
-        throw Exception('Lỗi khi up ảnh lên ImgBB: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception(e.toString());
-    }
+  // HÀM LẤY THÔNG TIN USER TỪ DATABASE (Phục vụ cho việc chuẩn bị đăng bài)
+  Future<model.User> getUserDetails() async {
+    User currentUser = _auth.currentUser!;
+    DocumentSnapshot snap = await _firestore.collection('users').doc(currentUser.uid).get();
+    return model.User.fromSnap(snap);
   }
 
-  // 2. HÀM ĐĂNG BÀI VIẾT LÊN FIREBASE FIRESTORE
+  // 2. HÀM ĐĂNG BÀI VIẾT LÊN FIREBASE FIRESTORE[cite: 15]
   Future<String> uploadPost(
     String description,
-    Uint8List file, // Dùng Uint8List để tương thích tốt với mọi dòng máy
+    Uint8List file, // Dùng Uint8List để tương thích tốt với mọi dòng máy[cite: 15]
     String uid,
     String username,
     String profImage,
   ) async {
-    String res = "Đã xảy ra lỗi";
+    String res = "Đã xảy ra lỗi"; //[cite: 15]
     try {
-      // Bước 2.1: Lấy link ảnh từ ImgBB
-      String photoUrl = await uploadImageToImgBB(file);
+      // Bước 2.1: Gọi StorageMethods để lấy link ảnh thay vì viết lại HTTP Request
+      String photoUrl = await StorageMethods().uploadImageToImgBB(file);
 
-      // Bước 2.2: Tạo ID duy nhất cho bài viết
-      String postId = const Uuid().v1();
+      // Bước 2.2: Tạo ID duy nhất cho bài viết[cite: 15]
+      String postId = const Uuid().v1(); //[cite: 15]
 
-      // Bước 2.3: Đóng gói dữ liệu bài viết
+      // Bước 2.3: Đóng gói dữ liệu bài viết[cite: 15]
       Map<String, dynamic> postData = {
-        'description': description,
-        'uid': uid,
-        'username': username,
-        'postId': postId,
-        'datePublished': DateTime.now(), // Thời gian thực
-        'postUrl': photoUrl,             // Link ảnh ImgBB
-        'profImage': profImage,
-        'likes': [],                     // Mảng chứa ID những người thả tim
+        'description': description, //[cite: 15]
+        'uid': uid, //[cite: 15]
+        'username': username, //[cite: 15]
+        'postId': postId, //[cite: 15]
+        'datePublished': DateTime.now(), // Thời gian thực[cite: 15]
+        'postUrl': photoUrl, // Link ảnh ImgBB[cite: 15]
+        'profImage': profImage, //[cite: 15]
+        'likes': [], // Mảng chứa ID những người thả tim[cite: 15]
       };
 
-      // Bước 2.4: Đẩy lên collection 'posts' trong Firestore
-      await _firestore.collection('posts').doc(postId).set(postData);
+      // Bước 2.4: Đẩy lên collection 'posts' trong Firestore[cite: 15]
+      await _firestore.collection('posts').doc(postId).set(postData); //[cite: 15]
 
-      res = "Thành công";
+      res = "Thành công"; //[cite: 15]
     } catch (err) {
-      res = err.toString();
+      res = err.toString(); //[cite: 15]
     }
-    return res;
+    return res; //[cite: 15]
   }
 }
