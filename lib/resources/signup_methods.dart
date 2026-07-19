@@ -17,13 +17,22 @@ class SignUpMethods {
     try {
       if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty && username.isNotEmpty) {
         
+        // Xử lý chuỗi email: Cắt khoảng trắng 2 đầu và chuyển thành chữ thường
+        String formattedEmail = email.trim().toLowerCase();
+
+        // Kiểm tra định dạng bắt buộc phải là @gmail.com
+        if (!formattedEmail.endsWith('@gmail.com')) {
+          return "Vui lòng nhập email đúng định dạng @gmail.com";
+        }
+        
+        // Kiểm tra xem mật khẩu nhập lại có trùng khớp không
         if (password != confirmPassword) {
           return "Mật khẩu xác nhận không trùng khớp!";
         }
 
         // 1. Tạo user trên Firebase Authentication
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
-          email: email,
+          email: formattedEmail, // Truyền email đã được xử lý chuẩn
           password: password,
         );
 
@@ -36,7 +45,7 @@ class SignUpMethods {
         model.User user = model.User(
           username: username,
           uid: cred.user!.uid,
-          email: email,
+          email: formattedEmail, // Lưu email đã được xử lý chuẩn vào Database
           bio: bio,
           photoUrl: defaultPhotoUrl,
         );
@@ -49,6 +58,13 @@ class SignUpMethods {
         res = "Thành công";
       } else {
         res = "Vui lòng điền đầy đủ thông tin";
+      }
+    } on FirebaseAuthException catch (err) {
+      // Bắt thêm lỗi trường hợp email bị trùng lặp đã tồn tại trên Firebase
+      if (err.code == 'email-already-in-use') {
+        res = "Email này đã được sử dụng cho một tài khoản khác!";
+      } else {
+        res = err.message ?? "Lỗi đăng ký xảy ra.";
       }
     } catch (err) {
       res = err.toString();
