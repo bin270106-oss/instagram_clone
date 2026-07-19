@@ -16,12 +16,6 @@ class LoginMethods {
           password: password,
         );
 
-        // 2. KIỂM TRA XEM EMAIL ĐÃ ĐƯỢC XÁC THỰC CHƯA
-        if (!cred.user!.emailVerified) {
-          await _auth.signOut(); // Đăng xuất ngay lập tức nếu chưa kích hoạt
-          return "Tài khoản chưa được xác thực! Vui lòng kiểm tra email của bạn.";
-        }
-
         res = "Thành công";
       } else {
         res = "Vui lòng điền đầy đủ email và mật khẩu";
