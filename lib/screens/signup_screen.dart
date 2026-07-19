@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/resources/auth_methods.dart';
+import 'package:instagram_clone/resources/signup_methods.dart';
 import 'package:instagram_clone/widgets/text_field_input.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -47,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     // 3. Đẩy thông tin xác thực sang hàm đăng ký chính của AuthMethods[cite: 3]
-    String res = await AuthMethods().signUpUser(
+    String res = await SignUpMethods().signUpUser(
       email: _emailController.text,
       password: _passwordController.text,
       confirmPassword: _confirmPasswordController.text,

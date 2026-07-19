@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:instagram_clone/resources/auth_methods.dart';
+import 'package:instagram_clone/resources/login_methods.dart';
 import 'package:instagram_clone/screens/signup_screen.dart';
 import 'package:instagram_clone/widgets/text_field_input.dart';
 import 'package:instagram_clone/screens/home_screen.dart';
@@ -84,8 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final targetEmail = customEmail ?? _emailController.text;
     final targetPassword = customPassword ?? _passwordController.text;
 
-    // Gọi hàm đăng nhập từ tầng dịch vụ AuthMethods[cite: 2]
-    String res = await AuthMethods().logInUser(
+    // Gọi hàm đăng nhập từ tầng dịch vụ LoginMethods[cite: 2]
+    String res = await LoginMethods().logInUser(
       email: targetEmail,
       password: targetPassword,
     );
