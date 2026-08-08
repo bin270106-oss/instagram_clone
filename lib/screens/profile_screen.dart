@@ -23,6 +23,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var userData = {};
   bool isLoading = true;
   bool isFollowing = false;
+  bool _showSuggestions = true; // Biến trạng thái ẩn/hiện danh sách gợi ý kết bạn
+  List<Map<String, dynamic>> _suggestedUsers = []; // Danh sách gộp chung thật từ DB và mock
   
   final currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
@@ -30,6 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     getData();
+    fetchSuggestedUsers();
   }
 
   getData() async {
@@ -67,6 +70,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
     
     if (!mounted) return;
     setState(() => isLoading = false);
+  }
+
+  // Lấy người dùng thật từ DB gộp chung với mock users
+  Future<void> fetchSuggestedUsers() async {
+    // Danh sách mock dự phòng luôn có sẵn
+    List<Map<String, dynamic>> mockUsers = [
+      {
+        'name': 'Kim Ngân',
+        'subtitle': 'Gợi ý cho bạn',
+        'avatar': 'https://i.pravatar.cc/150?img=40',
+      },
+      {
+        'name': 'Kiên Thiều',
+        'subtitle': '36 người theo dõi chung',
+        'avatar': 'https://i.pravatar.cc/150?img=45',
+      },
+      {
+        'name': 'Tín LoveTrg',
+        'subtitle': '3 người theo dõi chung',
+        'avatar': 'https://i.pravatar.cc/150?img=48',
+      },
+    ];
+
+    try {
+      var userSnap = await FirebaseFirestore.instance.collection('users').get();
+      print('=== Số lượng document trong users: ${userSnap.docs.length} ===');
+
+      List<Map<String, dynamic>> realUsers = userSnap.docs
+          .where((doc) => doc.id != currentUserId)
+          .map((doc) {
+            var data = doc.data();
+            return {
+              'name': data['username'] ?? 'User',
+              'subtitle': 'Gợi ý cho bạn',
+              'avatar': data['photoUrl'] ?? 'https://i.pravatar.cc/150?img=1',
+              'uid': doc.id,
+            };
+          }).toList();
+
+      if (mounted) {
+        setState(() {
+          _suggestedUsers = [...realUsers, ...mockUsers];
+        });
+      }
+    } catch (e) {
+      print('=== Lỗi tải danh sách gợi ý từ DB: $e ===');
+      if (mounted) {
+        setState(() {
+          _suggestedUsers = mockUsers;
+        });
+      }
+    }
   }
 
   // ===== HÀM HIỂN THỊ MENU SỬA/XÓA BÀI VIẾT (KHI NHẤN GIỮ BÀI VIẾT) =====
@@ -322,11 +377,153 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       decoration: BoxDecoration(color: Colors.grey[900], borderRadius: BorderRadius.circular(4)),
                                       child: IconButton(
                                         icon: const Icon(Icons.person_add_outlined, color: Colors.white),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          setState(() {
+                                            _showSuggestions = !_showSuggestions; // Bấm vào để ẩn/hiện danh sách gợi ý
+                                          });
+                                        },
                                       ),
                                     )
                                   ]
                                 ],
+                              ),
+                              
+                              // ==========================================
+                              // PHẦN GỢI Ý KẾT BẠN "KHÁM PHÁ MỌI NGƯỜI"
+                              // ==========================================
+                              AnimatedCrossFade(
+                                firstChild: const SizedBox.shrink(),
+                                secondChild: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Khám phá mọi người',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {},
+                                          child: const Text(
+                                            'Xem tất cả',
+                                            style: TextStyle(color: Colors.blueAccent, fontSize: 13),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 210,
+                                      child: _suggestedUsers.isEmpty
+                                          ? const Center(
+                                              child: Text(
+                                                'Không có gợi ý nào',
+                                                style: TextStyle(color: Colors.grey),
+                                              ),
+                                            )
+                                          : ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: _suggestedUsers.length,
+                                              itemBuilder: (context, index) {
+                                                final user = _suggestedUsers[index];
+
+                                                return Container(
+                                                  width: 150,
+                                                  margin: const EdgeInsets.only(right: 8),
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFF1E1E1E),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                                                  ),
+                                                  child: Stack(
+                                                    children: [
+                                                      Column(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          CircleAvatar(
+                                                            radius: 36,
+                                                            backgroundImage: NetworkImage(user['avatar'] ?? ''),
+                                                          ),
+                                                          const SizedBox(height: 8),
+                                                          Text(
+                                                            user['name'] ?? '',
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14,
+                                                            ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                          const SizedBox(height: 2),
+                                                          Text(
+                                                            user['subtitle'] ?? '',
+                                                            style: TextStyle(
+                                                              color: Colors.grey[400],
+                                                              fontSize: 11,
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                          const SizedBox(height: 10),
+                                                          SizedBox(
+                                                            width: double.infinity,
+                                                            height: 32,
+                                                            child: ElevatedButton(
+                                                              onPressed: () {},
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor: Colors.blueAccent,
+                                                                foregroundColor: Colors.white,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius.circular(6),
+                                                                ),
+                                                                padding: EdgeInsets.zero,
+                                                              ),
+                                                              child: const Text(
+                                                                'Theo dõi',
+                                                                style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.bold,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Positioned(
+                                                        top: 0,
+                                                        right: 0,
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {
+                                                              _suggestedUsers.removeAt(index);
+                                                            });
+                                                          },
+                                                          child: Icon(
+                                                            Icons.close,
+                                                            size: 16,
+                                                            color: Colors.grey[400],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                                crossFadeState: _showSuggestions
+                                    ? CrossFadeState.showSecond
+                                    : CrossFadeState.showFirst,
+                                duration: const Duration(milliseconds: 300),
                               ),
                             ],
                           ),
