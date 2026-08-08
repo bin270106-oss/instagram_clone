@@ -6,6 +6,8 @@ class User {
   final String photoUrl;
   final String username;
   final String bio;
+  final List followers; // Thêm biến followers
+  final List following; // Thêm biến following
 
   const User({
     required this.email,
@@ -13,16 +15,20 @@ class User {
     required this.photoUrl,
     required this.username,
     required this.bio,
+    required this.followers,
+    required this.following,
   });
 
   // Chuyển đổi đối tượng User thành Map để lưu lên Firestore
   Map<String, dynamic> toJson() => {
-    "username": username,
-    "uid": uid,
-    "email": email,
-    "photoUrl": photoUrl,
-    "bio": bio,
-  };
+        "username": username,
+        "uid": uid,
+        "email": email,
+        "photoUrl": photoUrl,
+        "bio": bio,
+        "followers": followers,
+        "following": following,
+      };
 
   // Chuyển dữ liệu từ Firestore về lại đối tượng User trong App
   static User fromSnap(DocumentSnapshot snap) {
@@ -34,6 +40,8 @@ class User {
       email: snapshot['email'] ?? '',
       photoUrl: snapshot['photoUrl'] ?? '',
       bio: snapshot['bio'] ?? '',
+      followers: snapshot['followers'] ?? [],
+      following: snapshot['following'] ?? [],
     );
   }
 }

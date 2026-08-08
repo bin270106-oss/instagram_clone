@@ -14,13 +14,15 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_auth: ^6.5.4
   cloud_firestore: ^6.6.0
-  firebase_storage: ^13.4.3
+  firebase_storage: ^13.4.5
   provider: ^6.0.5
   image_picker: ^1.1.2
-  cached_network_image: ^3.2.1
+  cached_network_image: ^3.4.1
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.5
   http: ^1.6.0
+  video_player: ^2.13.0
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

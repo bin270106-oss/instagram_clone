@@ -1,0 +1,40 @@
+// lib/models/mock_reels.dart
+
+List<Map<String, dynamic>> mockReels = [
+  {
+    'id': '1',
+    'thumbnail': 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop',
+    'username': 'nguyen_van_a',
+    'avatar': 'https://i.pravatar.cc/150?img=1',
+    'caption': 'Hoàng hôn tuyệt đẹp 🌅 #sunset #chill',
+    'likes': 12400,
+    'comments': 1024,
+    'isLiked': false,
+    'isFollowing': false,
+    'isLocalFile': false,
+  },
+  {
+    'id': '2',
+    'thumbnail': 'https://images.unsplash.com/photo-1516245834210-c4c14271569b?q=80&w=1000&auto=format&fit=crop',
+    'username': 'dev_thuc_dem',
+    'avatar': 'https://i.pravatar.cc/150?img=11',
+    'caption': 'Code xuyên đêm cùng đồng bọn 💻🔥 #coder',
+    'likes': 5200,
+    'comments': 342,
+    'isLiked': false,
+    'isFollowing': false,
+    'isLocalFile': false,
+  },
+  {
+    'id': '3',
+    'thumbnail': 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?q=80&w=1000&auto=format&fit=crop',
+    'username': 'ngoc_trinh_99',
+    'avatar': 'https://i.pravatar.cc/150?img=5',
+    'caption': 'Góc cafe quen thuộc cuối tuần ☕🌿',
+    'likes': 8900,
+    'comments': 567,
+    'isLiked': false,
+    'isFollowing': false,
+    'isLocalFile': false,
+  },
+];

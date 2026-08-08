@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       'email': email,
       'password': password,
       'username': email.split('@')[0],
-      'photoUrl': 'https://toppng.com/uploads/preview/instagram-default-profile-picture-11562973083t7199g30u7.png',
+      'photoUrl': 'https://i.pravatar.cc/150?img=12',
     });
 
     List<String> updatedJsonList = accounts.map((item) => json.encode(item)).toList();

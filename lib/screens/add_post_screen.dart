@@ -1,9 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:instagram_clone/models/user.dart' as model; 
-import 'package:instagram_clone/resources/firestore_methods.dart'; // Mọi logic lấy từ đây
-import 'package:instagram_clone/utils/utils.dart';
+import 'package:instagram_clone/resources/posts_methods.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -13,195 +11,159 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-  Uint8List? _file;
-  final TextEditingController _descriptionController = TextEditingController();
+  List<Uint8List> _selectedImages = [];
   bool _isLoading = false;
+  final TextEditingController _captionController = TextEditingController();
 
-  String _uid = '';
-  String _username = '';
-  String _avatarUrl = '';
+  // Hàm chọn nhiều ảnh
+  Future<void> _selectMultipleImages() async {
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> images = await picker.pickMultiImage();
+    
+    if (images.isNotEmpty) {
+      List<Uint8List> byteImages = [];
+      for (var img in images) {
+        byteImages.add(await img.readAsBytes());
+      }
+      setState(() {
+        _selectedImages = byteImages;
+      });
+    }
+  }
 
-  @override
-  void initState() {
-    super.initState();
-    _getUserData(); // Gọi hàm lấy dữ liệu user ngay khi mở màn hình
+  void _postImages() async {
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng chọn ít nhất 1 ảnh')));
+      return;
+    }
+    
+    setState(() => _isLoading = true);
+  
+    try {
+      // 1. Lấy thông tin user hiện tại từ Firebase để gắn vào bài viết
+      var user = await PostsMethods().getUserDetails();
+
+      // 2. Truyền đúng dữ liệu vào hàm uploadPost
+      String res = await PostsMethods().uploadPost(
+        _captionController.text,
+        _selectedImages[0],      
+        user.uid,                
+        user.username,           
+        user.photoUrl,           
+      );
+
+      setState(() => _isLoading = false);
+
+      if (res == "Thành công") {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã đăng bài viết!')));
+          Navigator.pop(context); // Đóng trang sau khi đăng
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi: $res')));
+        }
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
   }
 
   @override
   void dispose() {
-    _descriptionController.dispose();
+    _captionController.dispose();
     super.dispose();
-  }
-
-  // UI CHỈ NHẬN DỮ LIỆU ĐÃ ĐƯỢC XỬ LÝ SẴN TỪ FIRESTORE METHODS
-  void _getUserData() async {
-    try {
-      model.User user = await FirestoreMethods().getUserDetails();
-      
-      if (mounted) {
-        setState(() {
-          _uid = user.uid;
-          _username = user.username;
-          _avatarUrl = user.photoUrl;
-        });
-      }
-    } catch (e) {
-      debugPrint("Lỗi lấy dữ liệu người dùng: $e");
-    }
-  }
-
-  // Chọn ảnh từ thư viện
-  _selectImage(BuildContext parentContext) async {
-    return showDialog(
-      context: parentContext,
-      builder: (context) {
-        return SimpleDialog(
-          title: const Text('Tạo bài viết mới'),
-          children: [
-            SimpleDialogOption(
-              padding: const EdgeInsets.all(20),
-              child: const Text('Chụp ảnh mới'),
-              onPressed: () async {
-                Navigator.pop(context);
-                Uint8List file = await pickImage(ImageSource.camera);
-                setState(() => _file = file);
-              },
-            ),
-            SimpleDialogOption(
-              padding: const EdgeInsets.all(20),
-              child: const Text('Chọn từ thư viện'),
-              onPressed: () async {
-                Navigator.pop(context);
-                Uint8List file = await pickImage(ImageSource.gallery);
-                setState(() => _file = file);
-              },
-            ),
-            SimpleDialogOption(
-              padding: const EdgeInsets.all(20),
-              child: const Text('Hủy'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void clearImage() {
-    setState(() {
-      _file = null;
-      _descriptionController.clear();
-    });
-  }
-
-  // UI CHỈ KÍCH HOẠT HÀM UPLOAD VÀ XỬ LÝ HIỆU ỨNG LOADING
-  void _postImage() async {
-    if (_uid.isEmpty || _avatarUrl.isEmpty) {
-      showSnackBar('Đang tải dữ liệu, vui lòng đợi!', context);
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    String res = await FirestoreMethods().uploadPost(
-      _descriptionController.text,
-      _file!,
-      _uid,
-      _username,
-      _avatarUrl,
-    );
-
-    if (res == "Thành công") {
-      setState(() => _isLoading = false);
-      if (!mounted) return;
-      showSnackBar('Đã đăng bài viết!', context);
-      clearImage();
-    } else {
-      setState(() => _isLoading = false);
-      if (!mounted) return;
-      showSnackBar(res, context);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _file == null
-        ? Center(
-            child: IconButton(
-              icon: const Icon(Icons.upload, size: 50),
-              onPressed: () => _selectImage(context),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        // Dấu X để tắt màn hình
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white, size: 30),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Bài viết mới', style: TextStyle(color: Colors.white)),
+        actions: [
+          // Nút Đăng thay cho nút Tiếp
+          TextButton(
+            onPressed: _isLoading ? null : _postImages,
+            child: _isLoading 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.blue, strokeWidth: 2))
+              : const Text('Đăng', style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+      body: Column(
+        children: [
+          // Phần hiển thị ảnh ở giữa
+          Container(
+            height: MediaQuery.of(context).size.width, // Tạo khung vuông
+            width: double.infinity,
+            color: Colors.grey[900],
+            child: _selectedImages.isEmpty
+                ? const Center(child: Icon(Icons.photo_library, color: Colors.grey, size: 50))
+                : PageView.builder( // Dùng PageView để lướt xem nếu chọn nhiều ảnh
+                    itemCount: _selectedImages.length,
+                    itemBuilder: (context, index) {
+                      return Image.memory(
+                        _selectedImages[index],
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+          ),
+          
+          // Thanh công cụ (Đã bỏ Zoom và Gần đây)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Nút "Chọn nhiều" ảnh
+                GestureDetector(
+                  onTap: _selectMultipleImages,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.layers, color: Colors.white, size: 18),
+                        SizedBox(width: 6),
+                        Text('Chọn nhiều', style: TextStyle(color: Colors.white, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Ô nhập caption
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: _captionController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText: 'Viết chú thích...',
+                hintStyle: TextStyle(color: Colors.grey),
+                border: InputBorder.none,
+              ),
             ),
           )
-        : Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.black,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: clearImage, 
-              ),
-              title: const Text('Bài viết mới'),
-              centerTitle: false,
-              actions: [
-                TextButton(
-                  onPressed: _isLoading ? null : _postImage, 
-                  child: const Text(
-                    "Chia sẻ",
-                    style: TextStyle(color: Colors.blueAccent, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                )
-              ],
-            ),
-            body: Column(
-              children: [
-                _isLoading
-                    ? const LinearProgressIndicator(color: Colors.blueAccent)
-                    : const Padding(padding: EdgeInsets.only(top: 0)),
-                const Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(_avatarUrl.isNotEmpty 
-                          ? _avatarUrl 
-                          : 'https://toppng.com/uploads/preview/instagram-default-profile-picture-11562973083t7199g30u7.png'),
-                      radius: 20,
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: TextField(
-                        controller: _descriptionController,
-                        decoration: const InputDecoration(
-                          hintText: "Viết chú thích...", 
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
-                        maxLines: 8,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 45,
-                      width: 45,
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              fit: BoxFit.cover,
-                              alignment: FractionalOffset.topCenter,
-                              image: MemoryImage(_file!),
-                            )
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Divider(),
-              ],
-            ),
-          );
+        ],
+      ),
+    );
   }
 }

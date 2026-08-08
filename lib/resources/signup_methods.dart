@@ -15,8 +15,10 @@ class SignUpMethods {
   }) async {
     String res = "Đã xảy ra lỗi";
     try {
-      if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty && username.isNotEmpty) {
-        
+      if (email.isNotEmpty &&
+          password.isNotEmpty &&
+          confirmPassword.isNotEmpty &&
+          username.isNotEmpty) {
         // Xử lý chuỗi email: Cắt khoảng trắng 2 đầu và chuyển thành chữ thường
         String formattedEmail = email.trim().toLowerCase();
 
@@ -24,7 +26,7 @@ class SignUpMethods {
         if (!formattedEmail.endsWith('@gmail.com')) {
           return "Vui lòng nhập email đúng định dạng @gmail.com";
         }
-        
+
         // Kiểm tra xem mật khẩu nhập lại có trùng khớp không
         if (password != confirmPassword) {
           return "Mật khẩu xác nhận không trùng khớp!";
@@ -39,7 +41,8 @@ class SignUpMethods {
         // GỬI EMAIL XÁC THỰC ĐẾN HỘP THƯ NGƯỜI DÙNG
         await cred.user!.sendEmailVerification();
 
-        String defaultPhotoUrl = "https://toppng.com/uploads/preview/instagram-default-profile-picture-11562973083t7199g30u7.png";
+        String defaultPhotoUrl =
+            "https://i.pravatar.cc/150?img=12";
 
         // 2. Tạo đối tượng User từ model dữ liệu
         model.User user = model.User(
@@ -48,12 +51,15 @@ class SignUpMethods {
           email: formattedEmail, // Lưu email đã được xử lý chuẩn vào Database
           bio: bio,
           photoUrl: defaultPhotoUrl,
+          followers: [],
+          following: [],
         );
 
         // 3. Lưu thông tin chi tiết vào Firestore Database
-        await _firestore.collection('users').doc(cred.user!.uid).set(
-          user.toJson(),
-        );
+        await _firestore
+            .collection('users')
+            .doc(cred.user!.uid)
+            .set(user.toJson());
 
         res = "Thành công";
       } else {
