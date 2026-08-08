@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/resources/posts_methods.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FeedView extends StatelessWidget {
   const FeedView({super.key});
@@ -12,7 +13,15 @@ class FeedView extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('Instagram Clone', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'TKCT', 
+          // Dùng font Grand Hotel để fake font Billabong của Instagram gốc
+          style: GoogleFonts.grandHotel(
+            color: Colors.white, 
+            fontSize: 36, 
+            letterSpacing: 1.2,
+          ),
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.favorite_border, color: Colors.white), onPressed: () {}),
           IconButton(icon: const Icon(Icons.chat_bubble_outline, color: Colors.white), onPressed: () {}),

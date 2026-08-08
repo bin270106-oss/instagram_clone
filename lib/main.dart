@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:instagram_clone/screens/login_screen.dart';
 import 'firebase_options.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 void main() async {
   // Bắt buộc phải gọi hàm này khi có xử lý bất đồng bộ (async/await) trong main
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,8 +25,12 @@ class MyApp extends StatelessWidget {
       title: 'Instagram Clone',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
-        // Cấu hình màu nền tối chủ đạo giống hệt Instagram
         scaffoldBackgroundColor: const Color(0xFF000000),
+        
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
+          bodyMedium: GoogleFonts.inter(color: Colors.white),
+          bodyLarge: GoogleFonts.inter(color: Colors.white),
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF000000),
           elevation: 0,

@@ -42,11 +42,13 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
           // Hiển thị dạng lưới (Grid View) 3 cột giống Instagram
           return GridView.builder(
             padding: const EdgeInsets.all(2),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // 3 cột
-              crossAxisSpacing: 2,
-              mainAxisSpacing: 2,
-            ),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            // Nhỏ hơn 600px (Điện thoại) thì 3 cột, bự hơn (Tablet/Web) thì 5 hoặc 6 cột
+            crossAxisCount: MediaQuery.of(context).size.width > 600 ? 5 : 3, 
+            crossAxisSpacing: 2,
+            mainAxisSpacing: 2,
+            childAspectRatio: 1, // Đảm bảo ảnh luôn vuông vức
+          ),
             itemCount: savedPosts.length,
             itemBuilder: (context, index) {
               final post = savedPosts[index];

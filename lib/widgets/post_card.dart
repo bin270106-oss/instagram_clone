@@ -12,11 +12,13 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
+  // THÊM BIẾN NÀY ĐỂ ĐIỀU KHIỂN HIỆU ỨNG TIM
+  bool isLikeAnimating = false;
+
   @override
   Widget build(BuildContext context) {
     final currentUserUid = FirebaseAuth.instance.currentUser?.uid ?? '';
     
-    // Xử lý an toàn cho likes (phòng trường hợp dữ liệu cũ là int hoặc null)
     List likes = [];
     if (widget.snap['likes'] is List) {
       likes = widget.snap['likes'];
@@ -25,8 +27,15 @@ class _PostCardState extends State<PostCard> {
     final String postId = widget.snap['postId'] ?? '';
     final bool isMyPost = widget.snap['uid'] == currentUserUid;
 
+    // Logic kiểm tra thời gian khóa bài viết (Giữ nguyên)
+    DateTime? unlockDate;
+    if (widget.snap.data().toString().contains('unlockDate') && widget.snap['unlockDate'] != null) {
+      unlockDate = (widget.snap['unlockDate'] as Timestamp).toDate();
+    }
+    bool isLocked = unlockDate != null && DateTime.now().isBefore(unlockDate);
+
     return Container(
-      color: Colors.black, // Nền đen chuẩn Dark Mode
+      color: Colors.black,
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,6 +63,7 @@ class _PostCardState extends State<PostCard> {
                 ),
                 IconButton(
                   onPressed: () {
+                    // Popup tùy chọn (Giữ nguyên)
                     showDialog(
                       context: context,
                       builder: (context) => SimpleDialog(
@@ -123,23 +133,82 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
 
-          // 2. Image: Khung ảnh bài đăng (Hỗ trợ Double Tap thả tim)
+          // 2. Image: Khung ảnh bài đăng (ĐÃ THÊM HIỆU ỨNG TIM NẢY)
           GestureDetector(
             onDoubleTap: () async {
-              await PostsMethods().likePost(postId, currentUserUid, likes);
+              if (!isLocked) { 
+                await PostsMethods().likePost(postId, currentUserUid, likes);
+                
+                // Bật hiệu ứng tim
+                setState(() {
+                  isLikeAnimating = true;
+                });
+                
+                // Đợi 400ms rồi tắt hiệu ứng
+                await Future.delayed(const Duration(milliseconds: 400));
+                if (mounted) {
+                  setState(() {
+                    isLikeAnimating = false;
+                  });
+                }
+              }
             },
-            child: SizedBox(
-              height: 400,
-              width: double.infinity,
-              child: Image.network(
-                widget.snap['postUrl'] ?? 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba', 
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.grey),
-              ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: 400,
+                  width: double.infinity,
+                  child: isLocked
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[900],
+                            border: Border.all(color: Colors.blueAccent, width: 2),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.lock_clock, color: Colors.blueAccent, size: 60),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'BÀI VIẾT XUYÊN KHÔNG',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 2),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Sẽ tự động mở khóa vào:\n${unlockDate!.day}/${unlockDate.month}/${unlockDate.year} - ${unlockDate.hour}:${unlockDate.minute.toString().padLeft(2, '0')}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Image.network(
+                          widget.snap['postUrl'] ?? 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba', 
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.grey),
+                        ),
+                ),
+
+                // WIDGET TRÁI TIM ẢO ẢNH
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isLikeAnimating ? 1 : 0,
+                  child: AnimatedScale(
+                    duration: const Duration(milliseconds: 200),
+                    scale: isLikeAnimating ? 1.2 : 0.5,
+                    child: const Icon(
+                      Icons.favorite,
+                      color: Colors.white,
+                      size: 100, // Trái tim to chà bá giữa màn hình
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // 3. Actions: Dải nút Tim, Comment, Share, Save
+          // 3. Actions: Dải nút Tim, Comment, Share, Save (Giữ nguyên)
           Row(
             children: [
               IconButton(
@@ -179,7 +248,7 @@ class _PostCardState extends State<PostCard> {
             ],
           ),
 
-          // 4. Details: Lượt like, Caption, Xem bình luận
+          // 4. Details: Lượt like, Caption, Xem bình luận (Giữ nguyên)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -232,7 +301,7 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  // Hàm mở BottomSheet bình luận tương tự FeedView
+  // Hàm mở BottomSheet bình luận (Giữ nguyên)
   void _showCommentsBottomSheet(BuildContext context, String postId) {
     final TextEditingController commentController = TextEditingController();
 
