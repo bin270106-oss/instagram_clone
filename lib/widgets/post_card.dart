@@ -156,10 +156,11 @@ class _PostCardState extends State<PostCard> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SizedBox(
-                  height: 400,
-                  width: double.infinity,
-                  child: isLocked
+             AspectRatio(
+                aspectRatio: 4 / 5, // Tỷ lệ chuẩn Instagram (chiều ngang 4, chiều dọc 5)
+                child: SizedBox(
+                width: double.infinity,
+                child: isLocked
                       ? Container(
                           decoration: BoxDecoration(
                             color: Colors.grey[900],
@@ -189,6 +190,7 @@ class _PostCardState extends State<PostCard> {
                           errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.grey),
                         ),
                 ),
+             ),
 
                 // WIDGET TRÁI TIM ẢO ẢNH
                 AnimatedOpacity(

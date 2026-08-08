@@ -619,12 +619,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         return GridView.builder(
                           itemCount: (snapshot.data! as dynamic).docs.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 2,
-                            mainAxisSpacing: 2,
-                            childAspectRatio: 9 / 16,
-                          ),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          // Nhỏ hơn 600px (Điện thoại) thì 3 cột, bự hơn (Tablet/Web) thì 5 hoặc 6 cột
+                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 5 : 3, 
+                          crossAxisSpacing: 2,
+                          mainAxisSpacing: 2,
+                          childAspectRatio: 1, // Đảm bảo ảnh luôn vuông vức
+                        ),
                           itemBuilder: (context, index) {
                             DocumentSnapshot snap = (snapshot.data! as dynamic).docs[index];
                             return Stack(

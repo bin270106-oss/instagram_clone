@@ -10,6 +10,8 @@ class AddPostScreen extends StatefulWidget {
   State<AddPostScreen> createState() => _AddPostScreenState();
 }
 
+DateTime? _selectedUnlockDate; // Biến lưu giờ khóa
+
 class _AddPostScreenState extends State<AddPostScreen> {
   List<Uint8List> _selectedImages = [];
   bool _isLoading = false;
@@ -68,6 +70,30 @@ class _AddPostScreenState extends State<AddPostScreen> {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  // Hàm chọn thời gian mở khóa
+  Future<void> _pickUnlockDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)), // Đăng tối đa 1 tháng
+    );
+    if (pickedDate != null) {
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          _selectedUnlockDate = DateTime(
+            pickedDate.year, pickedDate.month, pickedDate.day,
+            pickedTime.hour, pickedTime.minute,
+          );
+        });
       }
     }
   }
