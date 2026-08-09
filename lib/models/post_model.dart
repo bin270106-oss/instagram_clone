@@ -9,6 +9,7 @@ class Post {
   final String postUrl;
   final String profImage;
   final List likes;
+  final DateTime? unlockDate; // <--- ĐÃ THÊM BIẾN NÀY
 
   Post({
     required this.description,
@@ -19,6 +20,7 @@ class Post {
     required this.postUrl,
     required this.profImage,
     required this.likes,
+    this.unlockDate, // <--- ĐÃ THÊM VÀO CONSTRUCTOR
   });
 
   // Chuyển Object thành dạng Map để up lên Firebase
@@ -31,6 +33,7 @@ class Post {
         'postUrl': postUrl,
         'profImage': profImage,
         'likes': likes,
+        'unlockDate': unlockDate, // <--- ĐÃ THÊM VÀO JSON
       };
 
   // Lấy dữ liệu từ Firebase ép kiểu về dạng Object Post
@@ -45,6 +48,10 @@ class Post {
       postUrl: snapshot['postUrl'],
       profImage: snapshot['profImage'],
       likes: snapshot['likes'],
+      // <--- ĐÃ THÊM LOGIC LẤY NGÀY MỞ KHÓA TỪ FIREBASE
+      unlockDate: snapshot['unlockDate'] != null 
+          ? (snapshot['unlockDate'] as Timestamp).toDate() 
+          : null,
     );
   }
 }

@@ -196,183 +196,195 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // BƯỚC 1: NHẬP EMAIL
   Widget _buildEmailStep() {
-    return _buildStepLayout(
-      title: 'Email của bạn là gì?',
-      subtitle: 'Nhập email có thể dùng để liên hệ với bạn. Sẽ không ai nhìn thấy thông tin này trên trang cá nhân của bạn.',
-      content: Column(
-        children: [
-          _buildInputField(controller: _emailController, hintText: 'Email', keyboardType: TextInputType.emailAddress),
-          const SizedBox(height: 12),
-          const Text(
-            'Bạn cũng sẽ nhận được email của chúng tôi và có thể chọn không nhận bất cứ lúc nào. Tìm hiểu thêm',
-            style: TextStyle(color: Colors.grey, fontSize: 13),
-          ),
-          const SizedBox(height: 16),
-          _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
-          const SizedBox(height: 12),
-          _buildSecondaryButton(text: 'Đăng ký bằng số di động', onPressed: () {}),
-        ],
-      ),
-    );
-  }
-
-  // BƯỚC 2: XÁC NHẬN MÃ OTP (Giao diện UI)
-  Widget _buildVerificationStep() {
-    return _buildStepLayout(
-      title: 'Nhập mã xác nhận',
-      subtitle: 'Để xác nhận trang cá nhân, hãy nhập mã gồm 6 chữ số mà chúng tôi đã gửi đến email của bạn.',
-      content: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(6, (index) {
-              return Container(
-                width: 50,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: index == 0 ? Colors.white : Colors.grey[800]!),
-                ),
-                child: TextField(
-                  controller: _otpControllers[index],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                  keyboardType: TextInputType.number,
-                  maxLength: 1,
-                  decoration: const InputDecoration(border: InputBorder.none, counterText: ''),
-                  onChanged: (value) {
-                    if (value.isNotEmpty && index < 5) FocusScope.of(context).nextFocus();
-                  },
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 24),
-          _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
-          const SizedBox(height: 12),
-          _buildSecondaryButton(text: 'Tôi không nhận được mã', onPressed: _showNoCodeModal),
-        ],
-      ),
-    );
-  }
-
-  // BƯỚC 3: NGÀY SINH (Đã gắn DatePicker)
-  Widget _buildBirthdayStep() {
-    return _buildStepLayout(
-      title: 'Ngày sinh của bạn là khi nào?',
-      subtitleWidget: RichText(
-        text: const TextSpan(
-          style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Email của bạn là gì?',
+        subtitle: 'Nhập email có thể dùng để liên hệ với bạn. Sẽ không ai nhìn thấy thông tin này trên trang cá nhân của bạn.',
+        content: Column(
           children: [
-            TextSpan(text: 'Hãy sử dụng ngày sinh của chính bạn, ngay cả khi tài khoản này dành cho doanh nghiệp, thú cưng hay gì đó khác. Thông tin này sẽ không hiển thị với bất kỳ ai trừ khi bạn chọn chia sẻ. '),
-            TextSpan(text: 'Tại sao tôi cần cung cấp ngày sinh của mình?', style: TextStyle(color: Color(0xFF3797EF))),
+            _buildInputField(controller: _emailController, hintText: 'Email', keyboardType: TextInputType.emailAddress),
+            const SizedBox(height: 12),
+            const Text(
+              'Bạn cũng sẽ nhận được email của chúng tôi và có thể chọn không nhận bất cứ lúc nào. Tìm hiểu thêm',
+              style: TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
+            const SizedBox(height: 12),
+            _buildSecondaryButton(text: 'Đăng ký bằng số di động', onPressed: () {}),
           ],
         ),
       ),
-      content: Column(
-        children: [
-          GestureDetector(
-            onTap: () => _selectDate(context), // Mở lịch khi bấm vào
-            child: AbsorbPointer( // Chặn bàn phím hiện lên
-              child: TextField(
-                controller: _birthdayController,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-                maxLines: 2,
-                decoration: InputDecoration(
-                  hintText: "Ngày sinh (0 tuổi)",
-                  hintStyle: TextStyle(color: Colors.grey[500]),
-                  filled: true,
-                  fillColor: const Color(0xFF1E1E1E),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
+    );
+  }
+
+  // BƯỚC 2: XÁC NHẬN MÃ OTP
+  Widget _buildVerificationStep() {
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Nhập mã xác nhận',
+        subtitle: 'Để xác nhận trang cá nhân, hãy nhập mã gồm 6 chữ số mà chúng tôi đã gửi đến email của bạn.',
+        content: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(6, (index) {
+                return Container(
+                  width: 50,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: index == 0 ? Colors.white : Colors.grey[800]!),
+                  ),
+                  child: TextField(
+                    controller: _otpControllers[index],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                    keyboardType: TextInputType.number,
+                    maxLength: 1,
+                    decoration: const InputDecoration(border: InputBorder.none, counterText: ''),
+                    onChanged: (value) {
+                      if (value.isNotEmpty && index < 5) FocusScope.of(context).nextFocus();
+                    },
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 24),
+            _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
+            const SizedBox(height: 12),
+            _buildSecondaryButton(text: 'Tôi không nhận được mã', onPressed: _showNoCodeModal),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // BƯỚC 3: NGÀY SINH
+  Widget _buildBirthdayStep() {
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Ngày sinh của bạn là khi nào?',
+        subtitleWidget: RichText(
+          text: const TextSpan(
+            style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+            children: [
+              TextSpan(text: 'Hãy sử dụng ngày sinh của chính bạn, ngay cả khi tài khoản này dành cho doanh nghiệp, thú cưng hay gì đó khác. Thông tin này sẽ không hiển thị với bất kỳ ai trừ khi bạn chọn chia sẻ. '),
+              TextSpan(text: 'Tại sao tôi cần cung cấp ngày sinh của mình?', style: TextStyle(color: Color(0xFF3797EF))),
+            ],
+          ),
+        ),
+        content: Column(
+          children: [
+            GestureDetector(
+              onTap: () => _selectDate(context), 
+              child: AbsorbPointer( 
+                child: TextField(
+                  controller: _birthdayController,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    hintText: "Ngày sinh (0 tuổi)",
+                    hintStyle: TextStyle(color: Colors.grey[500]),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E1E),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
-        ],
+            const SizedBox(height: 24),
+            _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
+          ],
+        ),
       ),
     );
   }
 
   // BƯỚC 4: TÊN ĐẦY ĐỦ
   Widget _buildNameStep() {
-    return _buildStepLayout(
-      title: 'Bạn tên gì?',
-      content: Column(
-        children: [
-          _buildInputField(controller: _nameController, hintText: 'Tên đầy đủ'),
-          const SizedBox(height: 24),
-          _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
-        ],
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Bạn tên gì?',
+        content: Column(
+          children: [
+            _buildInputField(controller: _nameController, hintText: 'Tên đầy đủ'),
+            const SizedBox(height: 24),
+            _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
+          ],
+        ),
       ),
     );
   }
 
-  // BƯỚC 5: TẠO TÊN NGƯỜI DÙNG (USERNAME)
+  // BƯỚC 5: TẠO TÊN NGƯỜI DÙNG
   Widget _buildUsernameStep() {
-    return _buildStepLayout(
-      title: 'Tạo tên người dùng',
-      subtitle: 'Thêm tên người dùng hoặc sử dụng gợi ý của chúng tôi. Bạn có thể đổi tên này bất kỳ lúc nào.',
-      content: Column(
-        children: [
-          TextField(
-            controller: _usernameController,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
-            decoration: InputDecoration(
-              labelText: 'Tên người dùng',
-              labelStyle: TextStyle(color: Colors.grey[500]),
-              filled: true,
-              fillColor: const Color(0xFF1E1E1E),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
-              suffixIcon: const Icon(Icons.check_circle_outline, color: Colors.green), 
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Tạo tên người dùng',
+        subtitle: 'Thêm tên người dùng hoặc sử dụng gợi ý của chúng tôi. Bạn có thể đổi tên này bất kỳ lúc nào.',
+        content: Column(
+          children: [
+            TextField(
+              controller: _usernameController,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: InputDecoration(
+                labelText: 'Tên người dùng',
+                labelStyle: TextStyle(color: Colors.grey[500]),
+                filled: true,
+                fillColor: const Color(0xFF1E1E1E),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[800]!)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
+                suffixIcon: const Icon(Icons.check_circle_outline, color: Colors.green), 
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
-        ],
+            const SizedBox(height: 24),
+            _buildPrimaryButton(text: 'Tiếp', onPressed: _nextStep),
+          ],
+        ),
       ),
     );
   }
 
-  // BƯỚC 6: MẬT KHẨU & BIO (ĐỂ KHỚP VỚI HÀM SIGN UP CỦA ÔNG)
+  // BƯỚC 6: MẬT KHẨU & BIO
   Widget _buildFinalPasswordStep() {
-    return _buildStepLayout(
-      title: 'Tạo mật khẩu',
-      subtitle: 'Tạo mật khẩu gồm ít nhất 6 chữ cái hoặc chữ số. Bạn nên chọn mật khẩu khó đoán.',
-      content: Column(
-        children: [
-          _buildInputField(controller: _passwordController, hintText: 'Mật khẩu', isObscure: true),
-          const SizedBox(height: 12),
-          _buildInputField(controller: _confirmPasswordController, hintText: 'Xác nhận mật khẩu', isObscure: true),
-          const SizedBox(height: 12),
-          _buildInputField(controller: _bioController, hintText: 'Tiểu sử (Bio)'),
-          const SizedBox(height: 24),
-          
-          ElevatedButton(
-            onPressed: _isLoading ? null : _signUpUserFinal, // GỌI API FIREBASE Ở ĐÂY
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0064E0),
-              minimumSize: const Size(double.infinity, 48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              elevation: 0,
+    return SingleChildScrollView(
+      child: _buildStepLayout(
+        title: 'Tạo mật khẩu',
+        subtitle: 'Tạo mật khẩu gồm ít nhất 6 chữ cái hoặc chữ số. Bạn nên chọn mật khẩu khó đoán.',
+        content: Column(
+          children: [
+            _buildInputField(controller: _passwordController, hintText: 'Mật khẩu', isObscure: true),
+            const SizedBox(height: 12),
+            _buildInputField(controller: _confirmPasswordController, hintText: 'Xác nhận mật khẩu', isObscure: true),
+            const SizedBox(height: 12),
+            _buildInputField(controller: _bioController, hintText: 'Tiểu sử (Bio)'),
+            const SizedBox(height: 24),
+            
+            ElevatedButton(
+              onPressed: _isLoading ? null : _signUpUserFinal, 
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0064E0),
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                elevation: 0,
+              ),
+              child: _isLoading 
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('Hoàn tất đăng ký', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-            child: _isLoading 
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('Hoàn tất đăng ký', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // ================= CÁC WIDGET DÙNG CHUNG =================
+  // ================= CÁC WIDGET DÙNG CHUNG (HELPER METHODS) =================
 
   Widget _buildStepLayout({required String title, String? subtitle, Widget? subtitleWidget, required Widget content}) {
     return Padding(

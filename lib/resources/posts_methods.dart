@@ -23,6 +23,7 @@ class PostsMethods {
     String uid,
     String username,
     String profImage,
+    {DateTime? unlockDate}
   ) async {
     String res = "Đã xảy ra lỗi";
     try {
@@ -42,6 +43,7 @@ class PostsMethods {
         'postUrl': photoUrl, // Link ảnh ImgBB
         'profImage': profImage,
         'likes': [], // Mảng chứa ID những người thả tim
+        'unlockDate': unlockDate,
       };
 
       // Bước 2.4: Đẩy lên collection 'posts' trong Firestore

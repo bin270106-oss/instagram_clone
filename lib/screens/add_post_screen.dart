@@ -51,7 +51,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         _selectedImages[0],      
         user.uid,                
         user.username,           
-        user.photoUrl,           
+        user.photoUrl,
+        unlockDate: _selectedUnlockDate,           
       );
 
       setState(() => _isLoading = false);
@@ -152,6 +153,30 @@ class _AddPostScreenState extends State<AddPostScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                GestureDetector(
+                  onTap: _pickUnlockDate,
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 10), // Khoảng cách với nút Chọn nhiều
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _selectedUnlockDate != null ? Colors.blueAccent : Colors.grey[800],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.timer, color: Colors.white, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          _selectedUnlockDate != null 
+                              ? '${_selectedUnlockDate!.hour}:${_selectedUnlockDate!.minute.toString().padLeft(2, '0')}' 
+                              : 'Hẹn giờ',
+                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 // Nút "Chọn nhiều" ảnh
                 GestureDetector(
                   onTap: _selectMultipleImages,
