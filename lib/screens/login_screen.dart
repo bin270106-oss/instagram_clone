@@ -140,11 +140,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Logo Instagram (Thay bằng ảnh thật nếu bạn có trong assets)
-                            Image.asset('assets/images/logo.png', height: 100),
-                            Container(
-                              height: 70,
-                              width: 70,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(25), // Ní chỉnh số này: càng lớn thì góc bo càng tròn
+                              child: Image.asset(
+                                'assets/images/logoapp.png',
+                                height: 100,
+                                width: 100, // Nên set width nếu ní muốn hình vuông chuẩn
+                                fit: BoxFit.cover, // Thêm dòng này để ảnh không bị méo khi bo góc
+                              ),
                             ),
                             const SizedBox(height: 40),
 
@@ -271,14 +274,27 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(height: 16),
                             // Biểu tượng Meta
-                            const Row(
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.all_inclusive, color: Colors.grey, size: 20), // Dùng icon vô cực tạm thay logo Meta
-                                SizedBox(width: 4),
-                                Text(
-                                  'Meta',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                ShaderMask(
+                                  shaderCallback: (bounds) => const LinearGradient(
+                                    colors: [
+                                      Color(0xFF833AB4), // Tím
+                                      Color(0xFFFD1D1D), // Đỏ
+                                      Color(0xFFFCB045), // Vàng cam
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ).createShader(bounds),
+                                  child: const Text(
+                                    'Được phát triển bởi tập đoàn tkct',
+                                    style: TextStyle(
+                                      color: Colors.white, // BẮT BUỘC phải để màu trắng thì gradient mới hiện lên được nha ní!
+                                      fontSize: 16, // Ní tùy chỉnh size ở đây
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),

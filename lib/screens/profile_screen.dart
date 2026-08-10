@@ -10,6 +10,9 @@ import 'liked_posts_screen.dart';
 import 'login_screen.dart';
 import 'saved_posts_screen.dart';
 import '../widgets/custom_avatar.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'add_story_screen.dart';
+import 'story_view_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid; 
@@ -155,10 +158,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 elevation: 0,
                 leading: isCurrentUser
                     ? IconButton(
-                        icon: const Icon(Icons.add, color: Colors.white, size: 26),
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPostScreen())),
-                      )
-                    : const BackButton(color: Colors.white),
+                      icon: const Icon(Icons.add, color: Colors.white, size: 26),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.grey[900],
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                          ),
+                          builder: (context) => SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 8),
+                                Container(
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[600],
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ListTile(
+                                  leading: const Icon(Icons.auto_stories, color: Colors.white),
+                                  title: const Text('Tạo tin', style: TextStyle(color: Colors.white)),
+                                  onTap: () {
+                                    Navigator.pop(context); // Đóng bảng chọn
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const AddStoryScreen()),
+                                    );
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.grid_on, color: Colors.white),
+                                  title: const Text('Tạo bài viết', style: TextStyle(color: Colors.white)),
+                                  onTap: () {
+                                    Navigator.pop(context); // Đóng bảng chọn
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const AddPostScreen()),
+                                    );
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.video_collection_outlined, color: Colors.white),
+                                  title: const Text('Tạo thước phim', style: TextStyle(color: Colors.white)),
+                                  onTap: () {
+                                    Navigator.pop(context); // Đóng bảng chọn
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const AddReelScreen()),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : const BackButton(color: Colors.white),
                 title: Text(
                   userData['username'] ?? 'Tài khoản',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
@@ -184,7 +245,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                CustomAvatar(radius: 40, avatarUrl: userData['photoUrl'] ?? ''),
+                                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                stream: FirebaseFirestore.instance
+                                    .collection('stories')
+                                    .where('uid', isEqualTo: widget.uid)
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  bool hasStory = false;
+                                  Map<String, dynamic>? storyData;
+
+                                  if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                                    hasStory = true;
+                                    var doc = snapshot.data!.docs.first;
+                                    storyData = Map<String, dynamic>.from(doc.data());
+                                    storyData['storyId'] = doc.id; // Gắn ID để xử lý xóa tin nếu là chủ nhân
+                                  }
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      if (hasStory && snapshot.hasData) {
+                                        // THAY ĐOẠN NÀY VÀO: Lấy toàn bộ danh sách docs từ snapshot của StreamBuilder
+                                        var docs = snapshot.data!.docs;
+                                        List<Map<String, dynamic>> listStories = docs.map((doc) {
+                                          var data = Map<String, dynamic>.from(doc.data());
+                                          data['storyId'] = doc.id;
+                                          return data;
+                                        }).toList();
+
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => StoryViewScreen(
+                                              stories: listStories,
+                                              initialIndex: 0,
+                                            ),
+                                          ),
+                                        );
+                                      } else if (isCurrentUser) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const AddStoryScreen(),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(hasStory ? 3.0 : 0.0),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: hasStory
+                                            ? const LinearGradient(
+                                                colors: [Color(0xFFfd1d1d), Color(0xFFfcb045), Color(0xFF833ab4)],
+                                                begin: Alignment.topRight,
+                                                end: Alignment.bottomLeft,
+                                              )
+                                            : null,
+                                      ),
+                                      child: Container(
+                                        padding: EdgeInsets.all(hasStory ? 2.0 : 0.0),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            CustomAvatar(radius: 40, avatarUrl: userData['photoUrl'] ?? ''),
+                                            // Nếu là trang của mình và chưa có tin thì hiện dấu cộng nhỏ góc phải
+                                            if (isCurrentUser && !hasStory)
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(2),
+                                                  decoration: const BoxDecoration(
+                                                    color: Color(0xFF0095F6),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(Icons.add, color: Colors.white, size: 16),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(

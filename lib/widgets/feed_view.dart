@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../resources/posts_methods.dart';
 import '../widgets/custom_avatar.dart';
 import '../widgets/story_bar.dart'; // 
-import '../screens/add_post_screen.dart';// Import màn hình tạo bài đăng
+import '../screens/add_post_screen.dart';
 import '../screens/notifications_screen.dart';
 
 class FeedView extends StatefulWidget {

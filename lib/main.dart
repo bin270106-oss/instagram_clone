@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:instagram_clone/screens/login_screen.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:instagram_clone/screens/splash_screen.dart';
 
 void main() async {
   // Bắt buộc phải gọi hàm này khi có xử lý bất đồng bộ (async/await) trong main
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
     );
   }
 }
