@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:instagram_clone/models/user.dart' as model;
 import 'package:instagram_clone/resources/storage_methods.dart';
+import 'notification_methods.dart'; // Đã import cỗ máy thông báo
 
 class PostsMethods {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -56,7 +57,7 @@ class PostsMethods {
     return res;
   }
 
-  // 1. HÀM THẢ TIM / BỎ TIM BÀI VIẾT
+  // 1. HÀM THẢ TIM / BỎ TIM BÀI VIẾT (ĐÃ THÊM THÔNG BÁO)
   Future<void> likePost(String postId, String uid, List likes) async {
     try {
       if (likes.contains(uid)) {
@@ -69,13 +70,27 @@ class PostsMethods {
         await _firestore.collection('posts').doc(postId).update({
           'likes': FieldValue.arrayUnion([uid]),
         });
+
+        // ----------------------------------------------------
+        // THÊM: GỬI THÔNG BÁO "ĐÃ THÍCH ẢNH" CHO CHỦ BÀI VIẾT
+        // ----------------------------------------------------
+        DocumentSnapshot snap = await _firestore.collection('posts').doc(postId).get();
+        if (snap.exists) {
+          String postOwnerUid = (snap.data()! as dynamic)['uid'];
+          await NotificationMethods().sendNotification(
+            targetUid: postOwnerUid,
+            fromUid: uid,
+            type: 'like_post',
+            postId: postId,
+          );
+        }
       }
     } catch (e) {
       print(e.toString());
     }
   }
 
-  // 2. HÀM ĐĂNG BÌNH LUẬN
+  // 2. HÀM ĐĂNG BÌNH LUẬN (ĐÃ THÊM THÔNG BÁO)
   Future<void> postComment(String postId, String text, String uid, String name, String profilePic) async {
     try {
       if (text.isNotEmpty) {
@@ -93,6 +108,21 @@ class PostsMethods {
           'commentId': commentId,
           'datePublished': DateTime.now(),
         });
+
+        // ----------------------------------------------------
+        // THÊM: GỬI THÔNG BÁO "ĐÃ BÌNH LUẬN" CHO CHỦ BÀI VIẾT
+        // ----------------------------------------------------
+        DocumentSnapshot snap = await _firestore.collection('posts').doc(postId).get();
+        if (snap.exists) {
+          String postOwnerUid = (snap.data()! as dynamic)['uid'];
+          await NotificationMethods().sendNotification(
+            targetUid: postOwnerUid,
+            fromUid: uid,
+            type: 'comment_post',
+            postId: postId,
+            commentText: text, // Truyền luôn nội dung bình luận để báo Notification
+          );
+        }
       }
     } catch (e) {
       print(e.toString());
